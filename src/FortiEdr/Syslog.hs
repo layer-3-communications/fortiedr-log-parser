@@ -41,7 +41,7 @@ decode !msg = Exts.fromList $ foldl'
              Just value' -> Count value' : acc
              Nothing -> acc
          | Bytes.equalsCString (Ptr "Destination"#) key -> Destination value : acc
-         | Bytes.equalsCString (Ptr "DeviceName"#) key -> DeviceName value : acc
+         | Bytes.equalsCString (Ptr "Device Name"#) key -> DeviceName value : acc
          | Bytes.equalsCString (Ptr "DeviceState"#) key -> DeviceState value : acc
          | Bytes.equalsCString (Ptr "Event ID"#) key -> case decodeW64 value of
              Just value' -> EventId value' : acc
