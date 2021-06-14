@@ -37,6 +37,9 @@ decode !msg = Exts.fromList $ foldl'
     Just (key,v) | Just (0x20,value) <- Bytes.uncons v ->
       if | Bytes.equalsCString (Ptr "Action"#) key -> Action value : acc
          | Bytes.equalsCString (Ptr "Classification"#) key -> Classification value : acc
+         | Bytes.equalsCString (Ptr "Count"#) key -> case decodeW64 value of
+             Just value' -> Count value' : acc
+             Nothing -> acc
          | Bytes.equalsCString (Ptr "Destination"#) key -> Destination value : acc
          | Bytes.equalsCString (Ptr "DeviceName"#) key -> DeviceName value : acc
          | Bytes.equalsCString (Ptr "DeviceState"#) key -> DeviceState value : acc
@@ -55,10 +58,12 @@ decode !msg = Exts.fromList $ foldl'
          | Bytes.equalsCString (Ptr "Raw Data ID"#) key -> case decodeW64 value of
              Just value' -> RawDataId value' : acc
              Nothing -> acc
+         | Bytes.equalsCString (Ptr "Rules List"#) key -> RulesList value : acc
          | Bytes.equalsCString (Ptr "Severity"#) key -> Severity value : acc
          | Bytes.equalsCString (Ptr "Source IP"#) key -> case decodeIp value of
              Just value' -> SourceIp value' : acc
              Nothing -> acc
+         | Bytes.equalsCString (Ptr "Users"#) key -> Users value : acc
          | otherwise -> acc
     _ -> acc
   ) [] (Bytes.split 0x3B msg)
@@ -68,6 +73,7 @@ decode !msg = Exts.fromList $ foldl'
 data Attribute
   = Action !Bytes -- ^ Action
   | Classification !Bytes -- ^ Classification
+  | Count !Word64 -- ^ Count
   | Destination !Bytes -- ^ Destination
   | DeviceName !Bytes -- ^ Device Name
   | DeviceState !Bytes -- ^ Device State
@@ -80,8 +86,10 @@ data Attribute
   | ProcessPath !Bytes -- ^ Process Path
   | ProcessType !Bytes -- ^ Process Type
   | RawDataId !Word64 -- ^ Raw Data ID
+  | RulesList !Bytes -- ^ Rules List
   | Severity !Bytes -- ^ Severity
   | SourceIp {-# UNPACK #-} !IP -- ^ Source IP
+  | Users !Bytes -- ^ Users
 
 decodeIp :: Bytes -> Maybe IP
 decodeIp = Parser.parseBytesMaybe (IP.parserUtf8Bytes () <* Parser.endOfInput ())
