@@ -16,15 +16,13 @@ main = do
   putStrLn "Finish"
 
 testA :: IO ()
-testA = case F.decode exA of
-  Nothing -> fail "could not decode exA"
-  Just attrs -> for_ attrs
-    (\case
-      F.MessageType n -> when (n /= Bytes.fromAsciiString "Security Event") (fail "wrong message type")
-      F.OrganizationId n -> when (n /= 1447934104) (fail "wrong organization id")
-      F.SourceIp n -> when (n /= IP.ipv4 192 0 2 19) (fail "wrong source ip")
-      _ -> pure ()
-    )
+testA = for_ (F.decode exA)
+  (\case
+    F.MessageType n -> when (n /= Bytes.fromAsciiString "Security Event") (fail "wrong message type")
+    F.OrganizationId n -> when (n /= 5714) (fail "wrong organization id")
+    F.SourceIp n -> when (n /= IP.ipv4 192 0 2 19) (fail "wrong source ip")
+    _ -> pure ()
+  )
 
 -- Anonymized example log
 exA :: Bytes
