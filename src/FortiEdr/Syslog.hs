@@ -52,6 +52,7 @@ decode !msg = Exts.fromList $ foldl'
          | Bytes.equalsCString (Ptr "Organization ID"#) key -> case decodeW64 value of
              Just value' -> OrganizationId value' : acc
              Nothing -> acc
+         | Bytes.equalsCString (Ptr "Process Hash"#) key -> ProcessHash value : acc
          | Bytes.equalsCString (Ptr "Process Name"#) key -> ProcessName value : acc
          | Bytes.equalsCString (Ptr "Process Path"#) key -> ProcessPath value : acc
          | Bytes.equalsCString (Ptr "Process Type"#) key -> ProcessType value : acc
@@ -82,6 +83,7 @@ data Attribute
   | OperatingSystem !Bytes -- ^ Operating System
   | Organization !Bytes -- ^ Organization
   | OrganizationId !Word64 -- ^ Organization ID
+  | ProcessHash !Bytes -- ^ Process Hash
   | ProcessName !Bytes -- ^ Process Name
   | ProcessPath !Bytes -- ^ Process Path
   | ProcessType !Bytes -- ^ Process Type
