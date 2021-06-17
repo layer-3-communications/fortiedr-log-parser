@@ -3,8 +3,11 @@
 import Control.Monad (when)
 import Data.Bytes (Bytes)
 import Data.Foldable (for_)
+import Data.List (find)
 
+import qualified Chronos
 import qualified Data.Bytes as Bytes
+import qualified Data.Primitive as PM
 import qualified FortiEdr.Syslog as F
 import qualified Net.IP as IP
 
@@ -16,13 +19,28 @@ main = do
   putStrLn "Finish"
 
 testA :: IO ()
-testA = for_ (F.decode exA)
-  (\case
-    F.MessageType n -> when (n /= Bytes.fromAsciiString "Security Event") (fail "wrong message type")
-    F.OrganizationId n -> when (n /= 5714) (fail "wrong organization id")
-    F.SourceIp n -> when (n /= IP.ipv4 192 0 2 19) (fail "wrong source ip")
+testA = do
+  let attrs = F.decode exA
+  for_ attrs
+    (\case
+      F.MessageType n -> when (n /= Bytes.fromAsciiString "Security Event") (fail "wrong message type")
+      F.OrganizationId n -> when (n /= 5714) (fail "wrong organization id")
+      F.SourceIp n -> when (n /= IP.ipv4 192 0 2 19) (fail "wrong source ip")
+      F.FirstSeen x -> when
+        (x /= Chronos.datetimeFromYmdhms 2021 5 24 5 27 44)
+        (fail "wrong first seen")
+      F.MacAddress macs -> when (PM.sizeofPrimArray macs /= 2) (fail "wrong number of MAC addresses")
+      _ -> pure ()
+    )
+  case find (\case {F.FirstSeen{} -> True; _ -> False}) attrs of
+    Nothing -> fail "missing first seen"
     _ -> pure ()
-  )
+  case find (\case {F.LastSeen{} -> True; _ -> False}) attrs of
+    Nothing -> fail "missing last seen"
+    _ -> pure ()
+  case find (\case {F.MacAddress{} -> True; _ -> False}) attrs of
+    Nothing -> fail "missing mac address"
+    _ -> pure ()
 
 -- Anonymized example log
 exA :: Bytes
