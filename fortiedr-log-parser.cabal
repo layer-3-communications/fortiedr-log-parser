@@ -16,12 +16,12 @@ library
   exposed-modules:
     FortiEdr.Syslog
   build-depends:
-    , base >=4.14 && <4.16
-    , byteslice
+    , base >=4.14 && <5
+    , byteslice >=0.2.7
     , bytesmith
     , chronos >=1.1.2
     , contiguous >=0.5.1
-    , ip
+    , ip >=1.7
     , primitive >=0.7.1
   hs-source-dirs: src
   ghc-options: -Wall -O2
